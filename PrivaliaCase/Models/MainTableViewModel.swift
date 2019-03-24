@@ -14,7 +14,7 @@ protocol MainTableViewModelDelegate: class {
 }
 
 final class MainTableViewModel {
-    private weak var delegate: MainTableViewModelDelegate?
+    public var delegate: MainTableViewModelDelegate?
     
     private var movies: [Movie] = []
     private var currentPage = 1
@@ -22,7 +22,7 @@ final class MainTableViewModel {
     private var currentQuerySave: String?
     private var isFetchInProgress = false
     
-    init(delegate: MainTableViewModelDelegate) {
+    init(delegate: MainTableViewModelDelegate?) {
         self.delegate = delegate
     }
     

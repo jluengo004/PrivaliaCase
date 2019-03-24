@@ -34,9 +34,15 @@ class MainTableViewCell: UITableViewCell {
             releaseDateLabel.text = dateFormatter.string(from: movie.releaseDate)
             overviewLabel.text = movie.overview
             overviewLabel.sizeToFit()
-            
-            if let imageData = try? Data(contentsOf: URL(string: ("https://image.tmdb.org/t/p/w58_and_h87_face" + movie.imageString!))!){
-                posterImageView.image = UIImage(data: imageData)
+            self.posterImageView.image = nil
+
+            DispatchQueue.global().async {
+                var imageData = try? Data(contentsOf: URL(string: ("https://image.tmdb.org/t/p/w154" + movie.imageString!))!)
+                DispatchQueue.main.async {
+                    if let imageDataFilled = imageData {
+                        self.posterImageView.image = UIImage(data: imageDataFilled)
+                    }
+                }
             }
 
 //            indicatorView.stopAnimating()
@@ -46,8 +52,5 @@ class MainTableViewCell: UITableViewCell {
 //            indicatorView.startAnimating()
         }
     }
-    
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        
-    }
+
 }

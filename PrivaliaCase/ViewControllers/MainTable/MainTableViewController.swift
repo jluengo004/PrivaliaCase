@@ -8,8 +8,8 @@
 
 import UIKit
 
-class MainTableViewController: UIViewController, MainTableViewModelDelegate {
-    private var viewModel: MainTableViewModel!
+class MainTableViewController: UIViewController, MainTableViewModelDelegate, AlertDisplayer {
+    public var viewModel: MainTableViewModel!
     
     private var shouldShowLoadingCell = false
     let searchController = UISearchController(searchResultsController: nil)
@@ -35,8 +35,9 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
         navigationItem.searchController?.isActive = true
         definesPresentationContext = true
         
-        viewModel = MainTableViewModel.init(delegate: self)
-        viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+        viewModel.delegate = self
+        tableView.isHidden = false
+        tableView.reloadData()
     }
 
     // MARK: - Table view data source
@@ -51,20 +52,14 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
 //            indicatorView.stopAnimating()
             tableView.isHidden = false
             if viewModel.isNewSearch{
-                tableView.setContentOffset(.zero, animated: true)
+                let indexPath = IndexPath(row: 0, section: 0)
+                self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
             tableView.reloadData()
             return
         }
         
-        let indexPathsToReload = visibleIndexPathsToReload(intersecting: newIndexPathsToReload)
-        tableView.reloadRows(at: indexPathsToReload, with: .automatic)
-    }
-    
-    func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
-        let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
-        let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
-        return Array(indexPathsIntersection)
+        tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
     }
     
     func onFetchFailed(with reason: String) {
@@ -72,19 +67,7 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
         
         let title = "Warning"
         let action = UIAlertAction(title: "OK", style: .default)
-        createAlert(with: title , message: reason, actions: [action])
-    }
-    
-    func createAlert(with title: String, message: String, actions: [UIAlertAction]? = nil) {
-        guard presentedViewController == nil else {
-            return
-        }
-        
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        actions?.forEach { action in
-            alertController.addAction(action)
-        }
-        present(alertController, animated: true)
+        displayAlert(with: title , message: reason, actions: [action])
     }
     
     func searchBarIsEmpty() -> Bool {
@@ -108,13 +91,6 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
 }
 
 extension MainTableViewController: UITableViewDataSource {
-    func tableView(tableView: UITableView,
-                   heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat
-    {
-        return 400
-    }
-    
-    
      func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.totalCount
     }
@@ -138,7 +114,9 @@ extension MainTableViewController: UITableViewDataSourcePrefetching {
         if indexPaths.contains(where: isLoadingCell) {
             let requestType = requestVarsByType().0
             let query = requestVarsByType().1
-            viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+            DispatchQueue.global().async() {
+                self.viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+            }
         }
     }
 }
@@ -147,7 +125,9 @@ extension MainTableViewController: UISearchBarDelegate {
     // MARK: - UISearchBar Delegate
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+        DispatchQueue.global().async() {
+            self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+        }
     }
 }
 
@@ -157,7 +137,9 @@ extension MainTableViewController: UISearchResultsUpdating {
         let requestType = requestVarsByType().0
         let query = requestVarsByType().1
         if query != nil{
-            self.viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+            DispatchQueue.global().async() {
+                self.viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+            }
         }
     }
 }
