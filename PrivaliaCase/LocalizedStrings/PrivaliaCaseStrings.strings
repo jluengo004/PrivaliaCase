@@ -1,0 +1,10 @@
+/* 
+  PrivaliaCaseStrings.strings
+  PrivaliaCase
+
+  Created by Marisa on 23/3/19.
+  Copyright © 2019 Jon. All rights reserved.
+*/
+
+error_fetch = "An error occurred while fetching data";
+error_decode= "An error occurred while decoding data";
