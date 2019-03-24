@@ -29,7 +29,7 @@ final class ServerCall {
         self.session = session
     }
     
-    func fetchMovies(requestType: RequestType, searchQuery: String?,
+    func fetchMovies(requestType: RequestType, searchQuery: String?, page: Int,
                          completion: @escaping (Result<MoviePage, DataResponseError>) -> Void) {
         
         var baseURL = URL(string: "base")!
@@ -38,11 +38,13 @@ final class ServerCall {
             baseURL = searchBaseURL
             parameters = [
                 URLQueryItem(name: "api_key", value: "93aea0c77bc168d8bbce3918cefefa45"),
+                URLQueryItem(name: "page", value: "\(page)"),
                 URLQueryItem(name: "query", value: searchQuery!)]
         }else{
             baseURL = discoverBaseURL
             parameters = [
                 URLQueryItem(name: "api_key", value: "93aea0c77bc168d8bbce3918cefefa45"),
+                URLQueryItem(name: "page", value: "\(page)"),
                 URLQueryItem(name: "sort_by", value: "popularity.desc")]
         }
         

@@ -19,6 +19,7 @@ final class MainTableViewModel {
     private var movies: [Movie] = []
     private var currentPage = 1
     private var total = 0
+    private var currentQuerySave: String?
     private var isFetchInProgress = false
     
     init(delegate: MainTableViewModelDelegate) {
@@ -26,6 +27,8 @@ final class MainTableViewModel {
     }
     
     let client = ServerCall()
+    
+    public var isNewSearch = false
     
     var totalCount: Int {
         return total
@@ -46,7 +49,14 @@ final class MainTableViewModel {
         }
         isFetchInProgress = true
         
-        client.fetchMovies(requestType: requestType, searchQuery: searchQuery) { result in
+        if searchQuery != currentQuerySave{
+            currentPage = 1
+            isNewSearch = true
+        }else{
+            isNewSearch = false
+        }
+        
+        client.fetchMovies(requestType: requestType, searchQuery: searchQuery, page: currentPage) { result in
             switch result {
             
             case .failure(let error):
@@ -59,11 +69,11 @@ final class MainTableViewModel {
                 DispatchQueue.main.async {
                     self.currentPage += 1
                     self.isFetchInProgress = false
-                    
+                    self.currentQuerySave = searchQuery
                     self.total = response.total_results
-//                    if response.page == 1{
-//                        self.movies.removeAll()
-//                    }
+                    if self.isNewSearch {
+                        self.movies.removeAll()
+                    }
                     
                     self.movies.append(contentsOf: response.movies)
                     

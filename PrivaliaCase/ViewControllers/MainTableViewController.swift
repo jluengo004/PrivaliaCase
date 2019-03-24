@@ -32,6 +32,7 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Movies"
         navigationItem.searchController = searchController
+        navigationItem.searchController?.isActive = true
         definesPresentationContext = true
         
         viewModel = MainTableViewModel.init(delegate: self)
@@ -49,10 +50,21 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
         guard let newIndexPathsToReload = newIndexPathsToReload else {
 //            indicatorView.stopAnimating()
             tableView.isHidden = false
+            if viewModel.isNewSearch{
+                tableView.setContentOffset(.zero, animated: true)
+            }
             tableView.reloadData()
             return
         }
-        tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
+        
+        let indexPathsToReload = visibleIndexPathsToReload(intersecting: newIndexPathsToReload)
+        tableView.reloadRows(at: indexPathsToReload, with: .automatic)
+    }
+    
+    func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
+        let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
+        let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
+        return Array(indexPathsIntersection)
     }
     
     func onFetchFailed(with reason: String) {
@@ -133,9 +145,6 @@ extension MainTableViewController: UITableViewDataSourcePrefetching {
 
 extension MainTableViewController: UISearchBarDelegate {
     // MARK: - UISearchBar Delegate
-    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-        //        filterContentForSearchText(searchBar.text!, scope: searchBar.scopeButtonTitles![selectedScope])
-    }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
