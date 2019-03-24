@@ -54,11 +54,6 @@ class MainTableViewCell: UITableViewCell {
                     }
                 }
             }
-            
-//            indicatorView.stopAnimating()
-        } else {
-//            indicatorView.startAnimating()
         }
     }
-
 }

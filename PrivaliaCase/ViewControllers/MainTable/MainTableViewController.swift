@@ -18,27 +18,29 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Privalia Movie"
+        title = "Privalia Movies"
+        
         tableView.prefetchDataSource = self
-        
-//        indicatorView.color = ColorPalette.RWGreen
-//        indicatorView.startAnimating()
-        
-        tableView.isHidden = true
         tableView.dataSource = self
+        tableView.estimatedSectionHeaderHeight = 30
         tableView.keyboardDismissMode = .onDrag
         
-        // Setup the Search Controller
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.delegate = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Movies"
-        navigationItem.searchController = searchController
-        definesPresentationContext = true
+        searchControllerSetUp()
         
         viewModel.delegate = self
         tableView.isHidden = false
         tableView.reloadData()
+    }
+    
+    func searchControllerSetUp(){
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Movies"
+        searchController.searchBar.backgroundColor = UIColor.black
+        searchController.searchBar.tintColor = UIColor.white
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -55,7 +57,6 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
     
     func onFetchCompleted(with newIndexPathsToReload: [IndexPath]?) {
         guard let newIndexPathsToReload = newIndexPathsToReload else {
-//            indicatorView.stopAnimating()
             tableView.isHidden = false
             if viewModel.isNewSearch{
                 let indexPath = IndexPath(row: 0, section: 0)
@@ -69,8 +70,6 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
     }
     
     func onFetchFailed(with reason: String) {
-//        indicatorView.stopAnimating()
-        
         let title = "Warning"
         let action = UIAlertAction(title: "OK", style: .default)
         displayAlert(with: title , message: reason, actions: [action])
@@ -97,10 +96,18 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
 }
 
 extension MainTableViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if searchController.searchBar.text != "" {
+            return ("Movies containing: " + searchController.searchBar.text!)
+        }else{
+            return "Most popular movies"
+        }
+    }
+    
      func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.totalCount
     }
-    
     
      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "movieCell",
