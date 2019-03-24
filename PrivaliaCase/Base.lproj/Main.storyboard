@@ -68,7 +68,7 @@
                                                 <constraint firstAttribute="trailing" secondItem="OBL-ZV-eRV" secondAttribute="trailing" constant="10" id="X1b-UW-kxe"/>
                                                 <constraint firstItem="OBL-ZV-eRV" firstAttribute="leading" secondItem="s0k-8t-z4i" secondAttribute="trailing" constant="15" id="eDC-c2-rSL"/>
                                                 <constraint firstItem="s0k-8t-z4i" firstAttribute="top" secondItem="l0p-v7-fBP" secondAttribute="top" constant="15" id="i9F-bf-Xm2"/>
-                                                <constraint firstAttribute="bottom" secondItem="g9G-B3-kby" secondAttribute="bottom" constant="5" id="nj4-ON-s7A"/>
+                                                <constraint firstAttribute="bottom" secondItem="g9G-B3-kby" secondAttribute="bottom" constant="10" id="nj4-ON-s7A"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>

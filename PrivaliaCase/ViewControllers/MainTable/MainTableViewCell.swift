@@ -31,24 +31,32 @@ class MainTableViewCell: UITableViewCell {
             
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy"
-            releaseDateLabel.text = dateFormatter.string(from: movie.releaseDate)
+            if let releaseDate = movie.releaseDate{
+                releaseDateLabel.text = dateFormatter.string(from: releaseDate)
+            }
             overviewLabel.text = movie.overview
             overviewLabel.sizeToFit()
             self.posterImageView.image = nil
-
+            
             DispatchQueue.global().async {
-                var imageData = try? Data(contentsOf: URL(string: ("https://image.tmdb.org/t/p/w154" + movie.imageString!))!)
-                DispatchQueue.main.async {
-                    if let imageDataFilled = imageData {
-                        self.posterImageView.image = UIImage(data: imageDataFilled)
+                if let imageString = movie.imageString{
+                    var imageData = try? Data(contentsOf: URL(string: ("https://image.tmdb.org/t/p/w154" + imageString))!)
+                    DispatchQueue.main.async {
+                        if imageData?.count != 0 && imageData != nil {
+                            self.posterImageView.image = UIImage(data: imageData!)
+                        }else{
+                            self.posterImageView.image = UIImage(named: "imageNotFound")
+                        }
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        self.posterImageView.image = UIImage(named: "imageNotFound")
                     }
                 }
             }
-
+            
 //            indicatorView.stopAnimating()
         } else {
-//            displayNameLabel.alpha = 0
-//            reputationContainerView.alpha = 0
 //            indicatorView.startAnimating()
         }
     }

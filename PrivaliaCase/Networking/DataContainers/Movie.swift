@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 struct Movie: Decodable {
-    let title: String
-    let releaseDate: Date
-    let overview: String
+    let title: String?
+    let releaseDate: Date?
+    let overview: String?
     let imageString: String?
     
     enum CodingKeys: String, CodingKey {
@@ -22,7 +22,7 @@ struct Movie: Decodable {
         case imageString = "poster_path"
     }
     
-    init(title: String, releaseDate: Date, overview: String, imageString: String?) {
+    init(title: String?, releaseDate: Date?, overview: String?, imageString: String?) {
         self.title = title
         self.releaseDate = releaseDate
         self.overview = overview
@@ -31,10 +31,11 @@ struct Movie: Decodable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let title = try container.decode(String.self, forKey: .title)
-        let releaseDate = try container.decode(Date.self, forKey: .releaseDate)
-        let overview = try container.decode(String.self, forKey: .overview)
-        let imageString = try container.decode(String.self, forKey: .imageString)
+        let title = try? container.decode(String.self, forKey: .title)
+        let releaseDate = try? container.decode(Date.self, forKey: .releaseDate)
+        let overview = try? container.decode(String.self, forKey: .overview)
+        let imageString = try? container.decode(String.self, forKey: .imageString)
         self.init(title: title, releaseDate: releaseDate, overview: overview, imageString: imageString)
     }
+    
 }

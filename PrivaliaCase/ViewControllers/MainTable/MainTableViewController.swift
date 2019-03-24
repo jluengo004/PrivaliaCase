@@ -11,6 +11,7 @@ import UIKit
 class MainTableViewController: UIViewController, MainTableViewModelDelegate, AlertDisplayer {
     public var viewModel: MainTableViewModel!
     
+    private var previousSearch = ""
     private var shouldShowLoadingCell = false
     let searchController = UISearchController(searchResultsController: nil)
     @IBOutlet var tableView: UITableView!
@@ -25,6 +26,7 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
         
         tableView.isHidden = true
         tableView.dataSource = self
+        tableView.keyboardDismissMode = .onDrag
         
         // Setup the Search Controller
         searchController.searchResultsUpdater = self
@@ -32,12 +34,16 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Movies"
         navigationItem.searchController = searchController
-        navigationItem.searchController?.isActive = true
         definesPresentationContext = true
         
         viewModel.delegate = self
         tableView.isHidden = false
         tableView.reloadData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
 
     // MARK: - Table view data source
@@ -125,8 +131,11 @@ extension MainTableViewController: UISearchBarDelegate {
     // MARK: - UISearchBar Delegate
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        DispatchQueue.global().async() {
-            self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+        if previousSearch != "" {
+            previousSearch = ""
+            DispatchQueue.global().async() {
+                self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+            }
         }
     }
 }
@@ -137,8 +146,14 @@ extension MainTableViewController: UISearchResultsUpdating {
         let requestType = requestVarsByType().0
         let query = requestVarsByType().1
         if query != nil{
+            previousSearch = query!
             DispatchQueue.global().async() {
                 self.viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+            }
+        }else if previousSearch != "" {
+            previousSearch = ""
+            DispatchQueue.global().async() {
+                self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
             }
         }
     }
