@@ -38,7 +38,6 @@ class MainTableViewCell: UITableViewCell {
             if let imageData = try? Data(contentsOf: URL(string: ("https://image.tmdb.org/t/p/w58_and_h87_face" + movie.imageString!))!){
                 posterImageView.image = UIImage(data: imageData)
             }
-//            posterImageView.sizeToFit()
 
 //            indicatorView.stopAnimating()
         } else {

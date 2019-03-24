@@ -29,7 +29,7 @@ final class ServerCall {
         self.session = session
     }
     
-    func fetchModerators(requestType: RequestType, searchQuery: String?,
+    func fetchMovies(requestType: RequestType, searchQuery: String?,
                          completion: @escaping (Result<MoviePage, DataResponseError>) -> Void) {
         
         var baseURL = URL(string: "base")!

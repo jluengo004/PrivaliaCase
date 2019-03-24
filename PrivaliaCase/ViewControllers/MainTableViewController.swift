@@ -12,6 +12,7 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
     private var viewModel: MainTableViewModel!
     
     private var shouldShowLoadingCell = false
+    let searchController = UISearchController(searchResultsController: nil)
     @IBOutlet var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -25,8 +26,16 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
         tableView.isHidden = true
         tableView.dataSource = self
         
+        // Setup the Search Controller
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Movies"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+        
         viewModel = MainTableViewModel.init(delegate: self)
-        viewModel.fetchModerators()
+        viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
     }
 
     // MARK: - Table view data source
@@ -43,7 +52,6 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
             tableView.reloadData()
             return
         }
-
         tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
     }
     
@@ -65,6 +73,25 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate {
             alertController.addAction(action)
         }
         present(alertController, animated: true)
+    }
+    
+    func searchBarIsEmpty() -> Bool {
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
+    
+    func isSearching() -> Bool {
+        let searchBarScopeIsFiltering = searchController.searchBar.selectedScopeButtonIndex != 0
+        return searchController.isActive && (!searchBarIsEmpty() || searchBarScopeIsFiltering)
+    }
+    
+    func requestVarsByType() -> (RequestType , String?){
+        var requestType = RequestType.DISCOVER
+        var query: String?
+        if isSearching(){
+            requestType = RequestType.SEARCH
+            query = searchController.searchBar.text!
+        }
+        return (requestType, query)
     }
 }
 
@@ -97,7 +124,31 @@ extension MainTableViewController: UITableViewDataSource {
 extension MainTableViewController: UITableViewDataSourcePrefetching {
     func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         if indexPaths.contains(where: isLoadingCell) {
-            viewModel.fetchModerators()
+            let requestType = requestVarsByType().0
+            let query = requestVarsByType().1
+            viewModel.fetchMovies(requestType: requestType, searchQuery: query)
+        }
+    }
+}
+
+extension MainTableViewController: UISearchBarDelegate {
+    // MARK: - UISearchBar Delegate
+    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        //        filterContentForSearchText(searchBar.text!, scope: searchBar.scopeButtonTitles![selectedScope])
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        self.viewModel.fetchMovies(requestType: RequestType.DISCOVER, searchQuery: nil)
+    }
+}
+
+extension MainTableViewController: UISearchResultsUpdating {
+    // MARK: - UISearchResultsUpdating Delegate
+    func updateSearchResults(for searchController: UISearchController) {
+        let requestType = requestVarsByType().0
+        let query = requestVarsByType().1
+        if query != nil{
+            self.viewModel.fetchMovies(requestType: requestType, searchQuery: query)
         }
     }
 }

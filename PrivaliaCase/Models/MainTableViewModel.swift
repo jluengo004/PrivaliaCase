@@ -39,17 +39,14 @@ final class MainTableViewModel {
         return movies[index]
     }
 
-    func fetchModerators() {
+    func fetchMovies(requestType: RequestType, searchQuery: String?) {
 
         guard !isFetchInProgress else {
             return
         }
         isFetchInProgress = true
         
-        let requestType = RequestType.DISCOVER
-        let searchQuery: String? = nil
-        
-        client.fetchModerators(requestType: requestType, searchQuery: searchQuery) { result in
+        client.fetchMovies(requestType: requestType, searchQuery: searchQuery) { result in
             switch result {
             
             case .failure(let error):
@@ -64,7 +61,12 @@ final class MainTableViewModel {
                     self.isFetchInProgress = false
                     
                     self.total = response.total_results
+//                    if response.page == 1{
+//                        self.movies.removeAll()
+//                    }
+                    
                     self.movies.append(contentsOf: response.movies)
+                    
 
                     if response.page > 1 {
                         let indexPathsToReload = self.calculateIndexPathsToReload(from: response.movies)
