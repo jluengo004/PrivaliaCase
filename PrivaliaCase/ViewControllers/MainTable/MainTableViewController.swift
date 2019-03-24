@@ -24,6 +24,7 @@ class MainTableViewController: UIViewController, MainTableViewModelDelegate, Ale
         tableView.dataSource = self
         tableView.estimatedSectionHeaderHeight = 30
         tableView.keyboardDismissMode = .onDrag
+        tableView.decelerationRate = UIScrollView.DecelerationRate(rawValue: 0.5)
         
         searchControllerSetUp()
         
